@@ -62,7 +62,7 @@
 
 -(void) loadPenguinOnCatapult{
     _currentPenguin = [CCBReader load:@"Penguin"];
-    CGPoint penguinPosition = [_catapultArm convertToWorldSpace:ccp(34, 138)];
+    CGPoint penguinPosition = [_catapultArm convertToWorldSpace:ccp(38, 138)];
     _currentPenguin.position = [_physicsNode convertToNodeSpace:penguinPosition];
     [_physicsNode addChild:_currentPenguin];
     _currentPenguin.physicsBody.allowsRotation = NO;

@@ -9,7 +9,9 @@
 #import "GamePlay.h"
 #import <cocos2d.h>
 #import "CCPhysics+ObjectiveChipmunk.h"
+#import "Penguin.h"
 
+static const float MIN_SPEED = 5.0f;
 
 @implementation GamePlay{
     CCPhysicsNode *_physicsNode;
@@ -19,20 +21,89 @@
     CCNode *_pullbackNode;
     CCNode *_mouseJointNode;
     CCPhysicsJoint *_mouseJoint;
-    CCNode *_currentPenguin;
+    Penguin *_currentPenguin;
     CCPhysicsJoint *_penguinCatapultJoint;
+    CCAction *_followPenguin;
 }
 
 -(void) didLoadFromCCB{
     self.userInteractionEnabled = YES;
     CCScene *level = [CCBReader loadAsScene:@"Levels/Level1"];
     [_levelNode addChild:level];
-    _physicsNode.debugDraw = YES;
+    //_physicsNode.debugDraw = YES;
     _pullbackNode.physicsBody.collisionMask = @[];
     _mouseJointNode.physicsBody.collisionMask = @[];
     _physicsNode.collisionDelegate = self;
     
 }
+
+-(void) update:(CCTime)delta{
+    if (_currentPenguin.launched) {
+        if (ccpLength(_currentPenguin.physicsBody.velocity) < MIN_SPEED) {
+            [self nextAttempt];
+            return;
+        }
+        int xMin = _currentPenguin.boundingBox.origin.x;
+        if (xMin < self.boundingBox.origin.x) {
+            [self nextAttempt];
+            return;
+        }
+        int xMax = xMin + _currentPenguin.boundingBox.size.width;
+        if (xMax > (self.boundingBox.origin.x + self.boundingBox.size.width)) {
+            [self nextAttempt];
+            return;
+        }
+    }
+}
+
+-(void) nextAttempt{
+    _currentPenguin = nil;
+    [_contentNode stopAction:_followPenguin];
+    CCActionMoveTo *actionMoveTo = [CCActionMoveTo actionWithDuration:1.f position:ccp(0, 0)];
+    [_contentNode runAction:actionMoveTo];
+}
+
+-(void)releaseCatapult{
+    if (_mouseJoint != nil) {
+        [_mouseJoint invalidate];
+        _mouseJoint = nil;
+        [self launchPeguin];
+    }
+}
+
+-(void) loadPenguinOnCatapult{
+    _currentPenguin = (Penguin *)[CCBReader load:@"Penguin"];
+    CGPoint penguinPosition = [_catapultArm convertToWorldSpace:ccp(34, 138)];
+    _currentPenguin.position = [_physicsNode convertToNodeSpace:penguinPosition];
+    [_physicsNode addChild:_currentPenguin];
+    _currentPenguin.physicsBody.allowsRotation = NO;
+    _penguinCatapultJoint = [CCPhysicsJoint connectedPivotJointWithBodyA:_currentPenguin.physicsBody bodyB:_catapultArm.physicsBody anchorA:_currentPenguin.anchorPointInPoints];
+}
+
+-(void) launchPeguin{
+    [_penguinCatapultJoint invalidate];
+    _penguinCatapultJoint = nil;
+    
+    _currentPenguin.physicsBody.allowsRotation = YES;
+    
+    _followPenguin = [CCActionFollow actionWithTarget:_currentPenguin worldBoundary:self.boundingBox];
+    [_contentNode runAction:_followPenguin];
+    _currentPenguin.launched = YES;
+}
+
+-(void) retry{
+    [[CCDirector sharedDirector] replaceScene:[CCBReader loadAsScene:@"GamePlay"]];
+}
+
+-(void) sealRemoved:(CCNode *) seal{
+    CCParticleSystem *explosion = (CCParticleSystem *)[CCBReader load:@"SealExplosion"];
+    explosion.autoRemoveOnFinish = YES;
+    explosion.position = seal.position;
+    [seal.parent addChild:explosion];
+    [seal removeFromParent];
+}
+
+#pragma mark - Touch Methods
 
 -(void) touchBegan:(UITouch *)touch withEvent:(UIEvent *)event{
     CGPoint touchLocation = [touch locationInNode:_contentNode];
@@ -55,36 +126,7 @@
     [self releaseCatapult];
 }
 
--(void)releaseCatapult{
-    if (_mouseJoint != nil) {
-        [_mouseJoint invalidate];
-        _mouseJoint = nil;
-        [self launchPeguin];
-    }
-}
-
--(void) loadPenguinOnCatapult{
-    _currentPenguin = [CCBReader load:@"Penguin"];
-    CGPoint penguinPosition = [_catapultArm convertToWorldSpace:ccp(34, 138)];
-    _currentPenguin.position = [_physicsNode convertToNodeSpace:penguinPosition];
-    [_physicsNode addChild:_currentPenguin];
-    _currentPenguin.physicsBody.allowsRotation = NO;
-    _penguinCatapultJoint = [CCPhysicsJoint connectedPivotJointWithBodyA:_currentPenguin.physicsBody bodyB:_catapultArm.physicsBody anchorA:_currentPenguin.anchorPointInPoints];
-}
-
--(void) launchPeguin{
-    [_penguinCatapultJoint invalidate];
-    _penguinCatapultJoint = nil;
-    
-    _currentPenguin.physicsBody.allowsRotation = YES;
-    
-    CCActionFollow *follow = [CCActionFollow actionWithTarget:_currentPenguin worldBoundary:self.boundingBox];
-    [_contentNode runAction:follow];
-}
-
--(void) retry{
-    [[CCDirector sharedDirector] replaceScene:[CCBReader loadAsScene:@"GamePlay"]];
-}
+#pragma mark - PhysicsCollision Delegate
 
 -(void) ccPhysicsCollisionPostSolve:(CCPhysicsCollisionPair *)pair seal:(CCNode *)nodeA wildcard:(CCNode *)nodeB{
     float energy = [pair totalKineticEnergy];
@@ -95,11 +137,5 @@
     }
 }
 
--(void) sealRemoved:(CCNode *) seal{
-    CCParticleSystem *explosion = (CCParticleSystem *)[CCBReader load:@"SealExplosion"];
-    explosion.autoRemoveOnFinish = YES;
-    explosion.position = seal.position;
-    [seal.parent addChild:explosion];
-    [seal removeFromParent];
-}
+
 @end

@@ -18,6 +18,8 @@
     CCNode *_pullbackNode;
     CCNode *_mouseJointNode;
     CCPhysicsJoint *_mouseJoint;
+    CCNode *_currentPenguin;
+    CCPhysicsJoint *_penguinCatapultJoint;
 }
 
 -(void) didLoadFromCCB{
@@ -34,6 +36,7 @@
     if (CGRectContainsPoint([_catapultArm boundingBox], touchLocation)) {
         _mouseJointNode.position = touchLocation;
         _mouseJoint = [CCPhysicsJoint connectedSpringJointWithBodyA:_mouseJointNode.physicsBody bodyB:_catapultArm.physicsBody anchorA:ccp(0, 0) anchorB:ccp(34, 138) restLength:0.f stiffness:3000.f damping:150.f];
+        [self loadPenguinOnCatapult];
     }
 }
 
@@ -53,18 +56,26 @@
     if (_mouseJoint != nil) {
         [_mouseJoint invalidate];
         _mouseJoint = nil;
+        [self launchPeguin];
     }
 }
 
+-(void) loadPenguinOnCatapult{
+    _currentPenguin = [CCBReader load:@"Penguin"];
+    CGPoint penguinPosition = [_catapultArm convertToWorldSpace:ccp(34, 138)];
+    _currentPenguin.position = [_physicsNode convertToNodeSpace:penguinPosition];
+    [_physicsNode addChild:_currentPenguin];
+    _currentPenguin.physicsBody.allowsRotation = NO;
+    _penguinCatapultJoint = [CCPhysicsJoint connectedPivotJointWithBodyA:_catapultArm.physicsBody bodyB:_currentPenguin.physicsBody anchorA:_currentPenguin.anchorPointInPoints];
+}
+
 -(void) launchPeguin{
-    CCNode *penguin = [CCBReader load: @"Penguin"];
-    penguin.position = ccpAdd(_catapultArm.position, ccp(16, 50));
-    [_physicsNode addChild:penguin];
-    CGPoint launchDirection = ccp(1,0);
-    CGPoint force = ccpMult(launchDirection, 8000);
-    [penguin.physicsBody applyForce:force];
-    self.position = ccp(0,0);
-    CCActionFollow *follow = [CCActionFollow actionWithTarget:penguin worldBoundary:self.boundingBox];
+    [_penguinCatapultJoint invalidate];
+    _penguinCatapultJoint = nil;
+    
+    _currentPenguin.physicsBody.allowsRotation = YES;
+    
+    CCActionFollow *follow = [CCActionFollow actionWithTarget:_currentPenguin worldBoundary:self.boundingBox];
     [_contentNode runAction:follow];
 }
 

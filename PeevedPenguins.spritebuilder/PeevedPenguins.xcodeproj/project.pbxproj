@@ -271,7 +271,7 @@
 				ORGANIZATIONNAME = Apportable;
 				TargetAttributes = {
 					B77F1B2D17B978D7009739AE = {
-						DevelopmentTeam = SBVP8ED765;
+						DevelopmentTeam = E3MVKW5CYC;
 						SystemCapabilities = {
 							com.apple.GameCenter = {
 								enabled = 0;
@@ -427,8 +427,8 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD)";
 				CLANG_ENABLE_OBJC_ARC = YES;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Allan Davis (M669D6UH7L)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Allan Davis (M669D6UH7L)";
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
@@ -450,7 +450,7 @@
 					"-ObjC",
 				);
 				PRODUCT_NAME = PeevedPenguins;
-				PROVISIONING_PROFILE = "";
+				PROVISIONING_PROFILE = "ba2a37d0-7ba8-458a-9785-9c6ed6f7d72c";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -461,7 +461,7 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD)";
 				CLANG_ENABLE_OBJC_ARC = YES;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Allan Davis (M669D6UH7L)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
@@ -482,7 +482,7 @@
 					"-ObjC",
 				);
 				PRODUCT_NAME = PeevedPenguins;
-				PROVISIONING_PROFILE = "";
+				PROVISIONING_PROFILE = "ba2a37d0-7ba8-458a-9785-9c6ed6f7d72c";
 				VALIDATE_PRODUCT = YES;
 				WRAPPER_EXTENSION = app;
 			};

@@ -105,7 +105,7 @@ static const float MIN_SPEED = 5.0f;
 
 #pragma mark - Touch Methods
 
--(void) touchBegan:(UITouch *)touch withEvent:(UIEvent *)event{
+-(void) touchBegan:(CCTouch *)touch withEvent:(UIEvent *)event{
     CGPoint touchLocation = [touch locationInNode:_contentNode];
     if (CGRectContainsPoint([_catapultArm boundingBox], touchLocation)) {
         _mouseJointNode.position = touchLocation;
@@ -114,7 +114,7 @@ static const float MIN_SPEED = 5.0f;
     }
 }
 
--(void) touchMoved:(UITouch *)touch withEvent:(UIEvent *)event{
+-(void) touchMoved:(CCTouch *)touch withEvent:(UIEvent *)event{
     CGPoint touchLocation = [touch locationInNode:_contentNode];
     _mouseJointNode.position = touchLocation;
 }
